@@ -11,17 +11,33 @@ namespace Cake.Npm
     /// </summary>
     public class NpmRunner : Tool<NpmRunnerSettings>
     {
+        private DirectoryPath WorkingDirectory { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="NpmRunner" /> class.
         /// </summary>
         /// <param name="fileSystem">The file system</param>
         /// <param name="environment">The environment</param>
         /// <param name="processRunner">The process runner</param>
-        /// <param name="globber">The globber</param>
-        internal NpmRunner(IFileSystem fileSystem, ICakeEnvironment environment, IProcessRunner processRunner, IGlobber globber) : base(fileSystem, environment, processRunner, globber)
+        /// <param name="tools">The tools</param>
+        internal NpmRunner(IFileSystem fileSystem, ICakeEnvironment environment, IProcessRunner processRunner, IToolLocator tools) : base(fileSystem, environment, processRunner, tools)
         {
+            WorkingDirectory = environment.WorkingDirectory;
         }
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NpmRunner" /> class
+        /// </summary>
+        /// <param name="packagePath">Path to the package file</param>
+        /// <param name="fileSystem">The file system</param>
+        /// <param name="environment">The environment</param>
+        /// <param name="processRunner">The process runner</param>
+        /// <param name="tools">The tools</param>
+        public NpmRunner(DirectoryPath packagePath, IFileSystem fileSystem, ICakeEnvironment environment, IProcessRunner processRunner, IToolLocator tools)
+            : this(fileSystem, environment, processRunner, tools)
+        {
+            WorkingDirectory = packagePath;
+        }
+
         /// <summary>
         /// execute 'npm install' with options
         /// </summary>
@@ -81,6 +97,17 @@ namespace Cake.Npm
         {
             yield return "npm.cmd";
             yield return "npm";
+        }
+
+        /// <summary>
+        /// Gets the working directory.
+        /// Defaults to the currently set working directory.
+        /// </summary>
+        /// <param name="settings">The settings.</param>
+        /// <returns>The working directory for the tool.</returns>
+        protected override DirectoryPath GetWorkingDirectory(NpmRunnerSettings settings)
+        {
+            return WorkingDirectory;
         }
     }
 }

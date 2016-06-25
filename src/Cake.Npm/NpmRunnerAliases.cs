@@ -1,6 +1,7 @@
 using System;
 using Cake.Core;
 using Cake.Core.Annotations;
+using Cake.Core.IO;
 
 namespace Cake.Npm
 {
@@ -99,7 +100,25 @@ namespace Cake.Npm
         {
             if(context == null) throw new ArgumentNullException(nameof(context));
 
-            return new NpmRunner(context.FileSystem, context.Environment, context.ProcessRunner, context.Globber);
+            return new NpmRunner(context.FileSystem, context.Environment, context.ProcessRunner, context.Tools);
+        }
+
+        /// <summary>
+        /// Gets an Npm runner in the context of the given package directory
+        /// </summary>
+        /// <param name="context">The context</param>
+        /// <param name="packagePath">A path to the package.json (or a package directory)</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        [CakeMethodAlias]
+        public static NpmRunner Npm(this ICakeContext context, Path packagePath)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (packagePath is FilePath)
+            {
+                packagePath = ((FilePath) packagePath).MakeAbsolute(context.Environment).GetDirectory();
+            }
+            return new NpmRunner((DirectoryPath)packagePath, context.FileSystem, context.Environment, context.ProcessRunner, context.Tools);
         }
     }
 }
